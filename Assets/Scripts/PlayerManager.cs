@@ -12,11 +12,13 @@ public class PlayerManager : MonoBehaviour {
     public float speed;
     public float gravity;
     public bool isGrounded = false;
+    public float jumpForce;
 
 
     // Private variables
     Vector2 movement = Vector2.zero;
     float gravityVelocity = 0.0f;
+    float jumpImpulsion = 0f;
 
 	// Use this for initialization
 	void Start () {
@@ -36,6 +38,11 @@ public class PlayerManager : MonoBehaviour {
 
     void checkGravity()
     {
+        if (jumpImpulsion > 0f)
+        {
+            gravityVelocity += jumpForce * Time.deltaTime;
+            jumpImpulsion -= jumpForce * Time.deltaTime;
+        }
         RaycastHit2D hit = Physics2D.Raycast(transform.position,-transform.up,1.5f);
         Debug.DrawLine(transform.position, transform.position - transform.up * 1.5f);
         if(hit.transform != null)
@@ -46,15 +53,19 @@ public class PlayerManager : MonoBehaviour {
         }
         else
         {
-            isGrounded = false;
-            gravityVelocity += Mathf.Pow(gravity * Time.deltaTime,2f);
-            movement += (Vector2)transform.up * -gravityVelocity;
+            gravityVelocity -= Mathf.Pow(gravity * Time.deltaTime,2f);
+            movement += (Vector2)transform.up * gravityVelocity;
         }
     }
     void checkInput()
     {
         float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        movement += (Vector2)transform.right * h * Time.deltaTime * speed;
+        if(Input.GetKey(KeyCode.Space) && isGrounded)
+        {
+            Debug.Log("jump");
+            jumpImpulsion = jumpForce;
+        }
     }
 
     void applyMovement()
@@ -64,8 +75,19 @@ public class PlayerManager : MonoBehaviour {
 
     void checkCollision()
     {
-        Vector2 nextFramePosition = (Vector2)transform.position + movement; 
+        Vector2 nextFramePosition = (Vector2)transform.position + movement;
+        RaycastHit2D hit;
         // check down Collision
+        if(!isGrounded)
+        {
+            hit = Physics2D.Raycast(nextFramePosition, -transform.up, 1.5f);
+       
+            if (hit.transform != null)
+            {
+                movement.y = (hit.point.y - nextFramePosition.y )+1.5f;
+                isGrounded = true;
+            }
 
+        }
     }
 }
