@@ -3,9 +3,16 @@ using System.Collections;
 
 public class PlayerManager : MonoBehaviour {
 
+    public enum state  
+    {
+        FullBody,
+        Separate,
+    }
+
+    public state currentState = state.FullBody;
     [Header("Body Parts")]
-    public GameObject upBody;
-    public GameObject downBody;
+    public UpBody upBody;
+    public DownBody downBody;
     public GameObject[] fists = new GameObject[2];
 
     [Header("Movement variables")]
@@ -13,12 +20,14 @@ public class PlayerManager : MonoBehaviour {
     public float gravity;
     public bool isGrounded = false;
     public float jumpForce;
-
+    public float jumpLength = 1f;
+    private float jumpStart;
 
     // Private variables
     Vector2 movement = Vector2.zero;
-    float gravityVelocity = 0.0f;
-    float jumpImpulsion = 0f;
+    public float gravityVelocity = 0.0f;
+    public float jumpImpulsion = 0f;
+    private Vector3 vel;
 
 	// Use this for initialization
 	void Start () {
@@ -32,17 +41,12 @@ public class PlayerManager : MonoBehaviour {
 
         checkGravity();
         checkInput();
-        checkCollision();
         applyMovement();
 	}
 
     void checkGravity()
     {
-        if (jumpImpulsion > 0f)
-        {
-            gravityVelocity += jumpForce * Time.deltaTime;
-            jumpImpulsion -= jumpForce * Time.deltaTime;
-        }
+        
         RaycastHit2D hit = Physics2D.Raycast(transform.position,-transform.up,1.5f);
         Debug.DrawLine(transform.position, transform.position - transform.up * 1.5f);
         if(hit.transform != null)
@@ -51,43 +55,65 @@ public class PlayerManager : MonoBehaviour {
             isGrounded = true;
             gravityVelocity = 0f;
         }
-        else
-        {
-            gravityVelocity -= Mathf.Pow(gravity * Time.deltaTime,2f);
-            movement += (Vector2)transform.up * gravityVelocity;
-        }
     }
     void checkInput()
     {
         float h = Input.GetAxisRaw("Horizontal");
         movement += (Vector2)transform.right * h * Time.deltaTime * speed;
-        if(Input.GetKey(KeyCode.Space) && isGrounded)
+        if(!Input.GetKeyDown(KeyCode.LeftShift)  && Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Debug.Log("jump");
             jumpImpulsion = jumpForce;
+            isGrounded = false;
+            jumpStart = Time.time;
+
+        }
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            Debug.Log("Lol");
+        }
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("jumpSpecial");
+            jumpImpulsion = jumpForce;
+            isGrounded = false;
+            jumpStart = Time.time;
+            currentState = state.Separate;
+
         }
     }
 
     void applyMovement()
     {
-        transform.position += (Vector3)movement;
-    }
-
-    void checkCollision()
-    {
-        Vector2 nextFramePosition = (Vector2)transform.position + movement;
-        RaycastHit2D hit;
-        // check down Collision
-        if(!isGrounded)
+        if (currentState == state.FullBody)
         {
-            hit = Physics2D.Raycast(nextFramePosition, -transform.up, 1.5f);
-       
-            if (hit.transform != null)
+            if (!isGrounded)
             {
-                movement.y = (hit.point.y - nextFramePosition.y )+1.5f;
-                isGrounded = true;
+                gravityVelocity -= Mathf.Pow(gravity * Time.deltaTime, 2f);
             }
-
+            movement.y += gravityVelocity;
+            if ((Time.time - jumpStart) < jumpLength)
+            {
+                movement.y += jumpForce * Time.deltaTime;
+            }
+            transform.position += (Vector3)movement;
+        }
+        else
+        {
+            if (!isGrounded)
+            {
+                gravityVelocity -= Mathf.Pow(gravity * Time.deltaTime, 2f);
+            }
+            movement.y += gravityVelocity;
+            if ((Time.time - jumpStart) < jumpLength)
+            {
+                movement.y += jumpForce * Time.deltaTime;
+            }
+            upBody.transform.position += (Vector3)movement;
+            downBody.enabled = true;
+            downBody.SetInertie(movement.x);
         }
     }
+
+
 }
