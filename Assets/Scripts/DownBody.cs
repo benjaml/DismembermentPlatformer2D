@@ -4,6 +4,7 @@ using System.Collections;
 public class DownBody : MonoBehaviour {
 
     public float inertie;
+    public bool moveAlone = false;
     
 	// Use this for initialization
 	void Start () {
@@ -12,11 +13,18 @@ public class DownBody : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        transform.position += new Vector3(inertie, 0.0f, 0.0f);
+        if(moveAlone)
+            transform.position += new Vector3(inertie, 0.0f, 0.0f);
 	}
 
     public void SetInertie(float speed)
     {
         inertie = speed;
+        moveAlone = true;
+    }
+    public void StopMovement()
+    {
+        inertie = 0;
+        moveAlone = false;
     }
 }

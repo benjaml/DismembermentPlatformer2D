@@ -22,6 +22,7 @@ public class PlayerManager : MonoBehaviour {
     public float jumpForce;
     public float jumpLength = 1f;
     private float jumpStart;
+    private bool jumping;
 
     // Private variables
     Vector2 movement = Vector2.zero;
@@ -66,19 +67,19 @@ public class PlayerManager : MonoBehaviour {
             jumpImpulsion = jumpForce;
             isGrounded = false;
             jumpStart = Time.time;
+            jumping = true;
+            gravityVelocity += jumpForce*Time.deltaTime;
 
-        }
-        if (Input.GetKey(KeyCode.LeftControl))
-        {
-            Debug.Log("Lol");
         }
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log("jumpSpecial");
             jumpImpulsion = jumpForce;
             isGrounded = false;
+            jumping = true;
             jumpStart = Time.time;
             currentState = state.Separate;
+            downBody.SetInertie(movement.x);
 
         }
     }
@@ -89,12 +90,14 @@ public class PlayerManager : MonoBehaviour {
         {
             if (!isGrounded)
             {
-                gravityVelocity -= Mathf.Pow(gravity * Time.deltaTime, 2f);
+                gravityVelocity -= gravity * Time.deltaTime;
             }
-            movement.y += gravityVelocity;
-            if ((Time.time - jumpStart) < jumpLength)
+            movement.y = gravityVelocity;   
+            RaycastHit2D hit = Physics2D.Raycast(transform.position+(Vector3)movement, -Vector3.up, 1.5f);
+            if (hit.transform != null)
             {
-                movement.y += jumpForce * Time.deltaTime;
+                float impactY = hit.point.y;
+                movement.y = impactY - transform.position.y + 1.5f;
             }
             transform.position += (Vector3)movement;
         }
@@ -102,16 +105,21 @@ public class PlayerManager : MonoBehaviour {
         {
             if (!isGrounded)
             {
-                gravityVelocity -= Mathf.Pow(gravity * Time.deltaTime, 2f);
+                gravityVelocity -= (gravity/2f) * Time.deltaTime;
             }
-            movement.y += gravityVelocity;
-            if ((Time.time - jumpStart) < jumpLength)
+            movement.y = gravityVelocity;
+            RaycastHit2D hit = Physics2D.Raycast(upBody.transform.position, -Vector3.up, 1f);
+            if (hit && hit.transform.tag == "down")
             {
-                movement.y += jumpForce * Time.deltaTime;
+                Debug.Log("Fusion !"); 
+                upBody.transform.position = hit.transform.position + Vector3.up;
+                currentState = state.FullBody;
+                downBody.StopMovement();
+                return;
             }
             upBody.transform.position += (Vector3)movement;
             downBody.enabled = true;
-            downBody.SetInertie(movement.x);
+            
         }
     }
 

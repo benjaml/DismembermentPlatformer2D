@@ -17,7 +17,7 @@ public class UpBody : MonoBehaviour {
     {
         if(col.transform.tag == "down")
         {
-            transform.parent.GetComponent<PlayerManager>().resetFullBody();
+            //transform.parent.GetComponent<PlayerManager>().resetFullBody();
         }
     }
 }
