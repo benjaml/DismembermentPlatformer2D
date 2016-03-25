@@ -53,7 +53,6 @@ public class PlayerManager : MonoBehaviour {
         Debug.DrawLine(transform.position, transform.position - transform.up * 1.5f);
         if(hit.transform != null)
         {
-            Debug.Log(hit.transform.name);
             isGrounded = true;
             gravityVelocity = 0f;
             //TODO: Faire plusieurs controller pour chaque partie du corp
@@ -63,29 +62,30 @@ public class PlayerManager : MonoBehaviour {
     {
         float h = Input.GetAxisRaw("Horizontal");
         movement += (Vector2)transform.right * h * Time.deltaTime * speed;
-        if(!Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if(!Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Debug.Log("jump");
             jumpImpulsion = jumpForce;
             isGrounded = false;
             jumpStart = Time.time;
             jumping = true;
-            gravityVelocity = jumpForce*Time.deltaTime;
+            gravityVelocity = jumpForce;
             // return pour qu'il ne fasse pas le 2eme if pour un saut normal en gounded
             return;
 
         }
         if ((Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space)) || (Input.GetKeyDown(KeyCode.Space) && !isGrounded && currentState == state.FullBody))
         {
-            Debug.Log("jumpSpecial");
+            Debug.Log("special jump");
             jumpImpulsion = jumpForce;
-            isGrounded = false;
             jumping = true;
             jumpStart = Time.time;
             currentState = state.Separate;
-            gravityVelocity = jumpForce * Time.deltaTime;
+            gravityVelocity = jumpForce;
             gravityOnlyVelocity = 0.0f;
-            downBody.SetInertie(movement.x);
+            downBody.isGrounded = isGrounded;
+            upBody.isGrounded = false;
+            downBody.SetInertie(movement.x/Time.deltaTime);
 
         }
     }
@@ -110,41 +110,57 @@ public class PlayerManager : MonoBehaviour {
         else
         {
             Vector3 movementDown = Vector3.zero;
-            if (!isGrounded)
+            // check gravity for the upBody
+            if (!upBody.isGrounded)
             {
-                gravityVelocity -= gravity * Time.deltaTime;
+                gravityVelocity -= (gravity/2.0f) * Time.deltaTime;
+            }
+            // check gravity for the downBody
+            if (!downBody.isGrounded)
+            {
                 gravityOnlyVelocity -= gravity * Time.deltaTime;
             }
             movement.y = gravityVelocity;
-            RaycastHit2D hit = Physics2D.Raycast(upBody.transform.position + (Vector3)movement, -Vector3.up, 1.5f);
-            if (hit && hit.transform.tag == "ground")
-            {
-                float impactY = hit.point.y;
-                movement.y = impactY - transform.position.y + 1.5f;
-            } 
             movementDown.y = gravityOnlyVelocity;
-            hit = Physics2D.Raycast(downBody.transform.position + (Vector3)movement, -Vector3.up, 1.5f);
+
+            // check if there is ground 
+            RaycastHit2D hit = Physics2D.Raycast(upBody.transform.position, -Vector3.up, 1.5f);
             if (hit && hit.transform.tag == "ground")
             {
+                Debug.Log("up hit the ground");
                 float impactY = hit.point.y;
-                movementDown.y = impactY - transform.position.y + 1.5f;
+                movement.y = impactY - upBody.transform.position.y + 1.5f;
+                gravityVelocity = 0.0f;
+                upBody.isGrounded = true;
             }
-            else if(Vector3.Distance(upBody.transform.position,downBody.transform.position)<1)
+
+            hit = Physics2D.Raycast(downBody.transform.position, -Vector3.up, 1.5f);
+            if (hit && hit.transform.tag == "ground")
+            {
+                Debug.Log("down hit the ground");
+                float impactY = hit.point.y;
+                movementDown.y = impactY - downBody.transform.position.y + 1.5f;
+                downBody.isGrounded = true;
+                gravityOnlyVelocity = 0.0f;
+            }
+            else if(Vector3.Distance(upBody.transform.position,downBody.transform.position)<1.0f)
             {
 
                 downBody.StopMovement();
-                Debug.Log("Fusion !");
                 upBody.transform.position = downBody.transform.position + Vector3.up;
                 currentState = state.FullBody;
+                gravityVelocity = 0.0f;
                 return;
             }
             upBody.transform.position += (Vector3)movement;
             movementDown.x = 0.0f;
-            downBody.transform.position += (Vector3)movementDown; 
+
+            downBody.transform.position += movementDown; 
             downBody.enabled = true;
 
-            //TODO: rajouter la gravité sur les jambes
+            //TODO: rajouter la gravité sur les jambes reste un bug quand on est en l'air
             //TODO: Bug de décalage quand le haut touche le sol
+            //TODO: Bug le perso s'envole ? quand on saute spécial
             
         }
     }

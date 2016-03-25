@@ -3,6 +3,7 @@ using System.Collections;
 
 public class UpBody : MonoBehaviour {
 
+    public bool isGrounded = false;
 	// Use this for initialization
 	void Start () {
 	
