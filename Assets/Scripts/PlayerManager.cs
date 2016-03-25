@@ -27,6 +27,7 @@ public class PlayerManager : MonoBehaviour {
     // Private variables
     Vector2 movement = Vector2.zero;
     public float gravityVelocity = 0.0f;
+    public float gravityOnlyVelocity = 0.0f;
     public float jumpImpulsion = 0f;
     private Vector3 vel;
 
@@ -55,23 +56,26 @@ public class PlayerManager : MonoBehaviour {
             Debug.Log(hit.transform.name);
             isGrounded = true;
             gravityVelocity = 0f;
+            //TODO: Faire plusieurs controller pour chaque partie du corp
         }
     }
     void checkInput()
     {
         float h = Input.GetAxisRaw("Horizontal");
         movement += (Vector2)transform.right * h * Time.deltaTime * speed;
-        if(!Input.GetKeyDown(KeyCode.LeftShift)  && Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if(!Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Debug.Log("jump");
             jumpImpulsion = jumpForce;
             isGrounded = false;
             jumpStart = Time.time;
             jumping = true;
-            gravityVelocity += jumpForce*Time.deltaTime;
+            gravityVelocity = jumpForce*Time.deltaTime;
+            // return pour qu'il ne fasse pas le 2eme if pour un saut normal en gounded
+            return;
 
         }
-        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space))
+        if ((Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space)) || (Input.GetKeyDown(KeyCode.Space) && !isGrounded && currentState == state.FullBody))
         {
             Debug.Log("jumpSpecial");
             jumpImpulsion = jumpForce;
@@ -79,6 +83,8 @@ public class PlayerManager : MonoBehaviour {
             jumping = true;
             jumpStart = Time.time;
             currentState = state.Separate;
+            gravityVelocity = jumpForce * Time.deltaTime;
+            gravityOnlyVelocity = 0.0f;
             downBody.SetInertie(movement.x);
 
         }
@@ -103,22 +109,42 @@ public class PlayerManager : MonoBehaviour {
         }
         else
         {
+            Vector3 movementDown = Vector3.zero;
             if (!isGrounded)
             {
-                gravityVelocity -= (gravity/2f) * Time.deltaTime;
+                gravityVelocity -= gravity * Time.deltaTime;
+                gravityOnlyVelocity -= gravity * Time.deltaTime;
             }
             movement.y = gravityVelocity;
-            RaycastHit2D hit = Physics2D.Raycast(upBody.transform.position, -Vector3.up, 1f);
-            if (hit && hit.transform.tag == "down")
+            RaycastHit2D hit = Physics2D.Raycast(upBody.transform.position + (Vector3)movement, -Vector3.up, 1.5f);
+            if (hit && hit.transform.tag == "ground")
             {
-                Debug.Log("Fusion !"); 
-                upBody.transform.position = hit.transform.position + Vector3.up;
-                currentState = state.FullBody;
+                float impactY = hit.point.y;
+                movement.y = impactY - transform.position.y + 1.5f;
+            } 
+            movementDown.y = gravityOnlyVelocity;
+            hit = Physics2D.Raycast(downBody.transform.position + (Vector3)movement, -Vector3.up, 1.5f);
+            if (hit && hit.transform.tag == "ground")
+            {
+                float impactY = hit.point.y;
+                movementDown.y = impactY - transform.position.y + 1.5f;
+            }
+            else if(Vector3.Distance(upBody.transform.position,downBody.transform.position)<1)
+            {
+
                 downBody.StopMovement();
+                Debug.Log("Fusion !");
+                upBody.transform.position = downBody.transform.position + Vector3.up;
+                currentState = state.FullBody;
                 return;
             }
             upBody.transform.position += (Vector3)movement;
+            movementDown.x = 0.0f;
+            downBody.transform.position += (Vector3)movementDown; 
             downBody.enabled = true;
+
+            //TODO: rajouter la gravité sur les jambes
+            //TODO: Bug de décalage quand le haut touche le sol
             
         }
     }
