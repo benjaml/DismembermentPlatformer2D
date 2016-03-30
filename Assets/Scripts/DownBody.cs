@@ -7,10 +7,6 @@ public class DownBody : MonoBehaviour {
     public bool moveAlone = false;
     public bool isGrounded = false;
 
-    // Use this for initialization
-    void Start () {
-	
-	}
 	
 	// Update is called once per frame
 	void Update () {
