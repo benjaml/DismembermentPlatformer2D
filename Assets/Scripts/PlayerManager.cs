@@ -16,10 +16,10 @@ public class PlayerManager : MonoBehaviour {
     public GameObject[] fists = new GameObject[2];
 
     [Header("Movement variables")]
-    public float speed = 5.0f;
-    public float gravity = 3.0f ;
+    public float speed = 6.0f;
+    public float gravity = 10.0f ;
     public bool isGrounded = true;
-    public float jumpForce = 0.5f;
+    public float jumpForce = 0.1f;
     public float jumpLength = 1f;
     private float jumpStart;
     private bool jumping;
@@ -52,22 +52,42 @@ public class PlayerManager : MonoBehaviour {
     {
         if(currentState == state.FullBody)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position,-transform.up,1.5f);
-            Debug.DrawLine(transform.position, transform.position - transform.up * 1.5f);
-            if(hit.transform != null)
+            RaycastHit2D hit = Physics2D.Raycast(downBody.transform.position, -transform.up, 0.5f);
+            Debug.DrawLine(downBody.transform.position, downBody.transform.position - transform.up * 0.5f);
+            if (hit.transform != null)
             {
                 isGrounded = true;
                 gravityVelocity = 0f;
-                //TODO: Faire plusieurs controller pour chaque partie du corp
+                downBody.transform.position = (Vector3)hit.point + Vector3.up * 0.5f;
+                upBody.transform.position = (Vector3)hit.point + Vector3.up * 1.5f;
             }
 
+        }
+        else
+        {
+            RaycastHit2D hit = Physics2D.Raycast(upBody.transform.position, -transform.up, 0.5f);
+            Debug.DrawLine(upBody.transform.position, upBody.transform.position - transform.up * 0.5f);
+            if (hit.transform != null)
+            {
+                upBody.isGrounded = true;
+                gravityVelocity = 0f;
+                upBody.transform.position = (Vector3)hit.point + Vector3.up*0.5f;
+            }
+            hit = Physics2D.Raycast(downBody.transform.position, -transform.up, 0.5f);
+            Debug.DrawLine(downBody.transform.position, downBody.transform.position - transform.up * 0.5f);
+            if (hit.transform != null)
+            {
+                downBody.isGrounded = true;
+                gravityOnlyVelocity = 0f;
+                downBody.transform.position = (Vector3)hit.point + Vector3.up * 0.5f;
+            }
         }
     }
     void checkInput()
     {
         float h = Input.GetAxisRaw("Horizontal");
         movement += (Vector2)transform.right * h * Time.deltaTime * speed;
-        if(!Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if(!Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && isGrounded && currentState == state.FullBody)
         {
             Debug.Log("jump");
             jumpImpulsion = jumpForce;
@@ -154,12 +174,7 @@ public class PlayerManager : MonoBehaviour {
             }
             else if(Vector3.Distance(upBody.transform.position+(Vector3)movement,downBody.transform.position)<1.0f)
             {
-                Debug.Log("fusion");
-                downBody.StopMovement();
-                upBody.transform.position = downBody.transform.position + Vector3.up;
-                currentState = state.FullBody;
-                gravityVelocity = 0.0f;
-                upBody.isGrounded = true;
+                PutTogether();
                 return;
             }
             if(appliedForce)
@@ -172,12 +187,18 @@ public class PlayerManager : MonoBehaviour {
             downBody.transform.position += movementDown; 
             downBody.enabled = true;
 
-            //TODO: rajouter la gravité sur les jambes reste un bug quand on est en l'air
-            //TODO: Bug de décalage quand le haut touche le sol
-            //TODO: Bug le perso s'envole ? quand on saute spécial
             
         }
     }
+    public void PutTogether()
+    {
+        Debug.Log("fusion");
+        downBody.StopMovement();
+        upBody.transform.position = downBody.transform.position + Vector3.up;
+        currentState = state.FullBody;
+        gravityVelocity = 0.0f;
+        upBody.isGrounded = true;
+    }
 
-
+    
 }
