@@ -16,11 +16,11 @@ public class PlayerManager : MonoBehaviour {
     public GameObject[] fists = new GameObject[2];
 
     [Header("Movement variables")]
-    public float speed = 6.0f;
-    public float gravity = 10.0f ;
+    private float speed = 7f;
+    private float gravity = 10.0f ;
     public bool isGrounded = true;
-    public float jumpForce = 0.1f;
-    public float jumpLength = 1f;
+    private float jumpForce = 0.1f;
+    private float jumpLength = 1f;
     private float jumpStart;
     private bool jumping;
 
@@ -58,8 +58,8 @@ public class PlayerManager : MonoBehaviour {
             {
                 isGrounded = true;
                 gravityVelocity = 0f;
-                downBody.transform.position = (Vector3)hit.point + Vector3.up * 0.5f;
-                upBody.transform.position = (Vector3)hit.point + Vector3.up * 1.5f;
+                //downBody.transform.position = (Vector3)hit.point + Vector3.up * 0.5f;
+                //upBody.transform.position = (Vector3)hit.point + Vector3.up * 1.5f;
             }
 
         }
