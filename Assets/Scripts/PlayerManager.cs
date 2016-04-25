@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System;
 
 public class PlayerManager : MonoBehaviour {
 
@@ -13,7 +15,7 @@ public class PlayerManager : MonoBehaviour {
     [Header("Body Parts")]
     public UpBody upBody;
     public DownBody downBody;
-    public GameObject[] fists = new GameObject[2];
+    public List<GameObject> fists = new List<GameObject>();
 
     [Header("Movement variables")]
     private float speed = 7f;
@@ -115,6 +117,21 @@ public class PlayerManager : MonoBehaviour {
             downBody.SetInertie(movement.x/Time.deltaTime);
 
         }
+        if(Input.GetMouseButtonDown(0))
+        {
+            FireArm();
+        }
+    }
+
+    private void FireArm()
+    {
+        if (fists.Count == 0)
+            return;
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = transform.position.z;
+        Vector3 direction = mousePos - upBody.transform.position; 
+        fists[0].GetComponent<FistComponent>().Fire(direction.normalized);
+        fists.RemoveAt(0);
     }
 
     void applyMovement()
