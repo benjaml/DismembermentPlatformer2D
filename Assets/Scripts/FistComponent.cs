@@ -10,16 +10,24 @@ public class FistComponent : MonoBehaviour {
     public float gravity;
     public float friction;
     private bool fired = false;
+    private bool returnBool = false;
     
 	
 	// Update is called once per frame
 	void Update () {
         if (!fired)
             return;
-        velocityX *= 1-Time.deltaTime;
-        velocityY -= Mathf.Pow(gravity, 2) * Time.deltaTime;
-        transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
-        CheckCollision();
+        if(!returnBool)
+        {
+            velocityX *= 1-Time.deltaTime;
+            velocityY -= Mathf.Pow(gravity, 2) * Time.deltaTime;
+            transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
+            CheckCollision();
+        }
+        else
+        {
+            
+        }
 	}
 
     private void CheckCollision()
@@ -45,7 +53,15 @@ public class FistComponent : MonoBehaviour {
         }
     }
 
-
+    public void Return(Vector3 position)
+    {
+        Vector3 direction = (position - transform.position).normalized;
+        direction *= force;
+        velocityX = direction.x;
+        velocityY = direction.y;
+        returnBool = true;
+        //TODO: Remettre le fist dans le joueur
+    }
 
     public void Fire(Vector3 direction)
     {
