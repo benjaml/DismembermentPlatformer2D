@@ -9,24 +9,38 @@ public class FistComponent : MonoBehaviour {
     public float force;
     public float gravity;
     public float friction;
-    private bool fired = false;
-    private bool returnBool = false;
+    public  GameObject fistPosition;
+    public bool fired = false;
+    public bool returnBool = false;
     
+    void Start()
+    {
+        fistPosition = GameObject.FindGameObjectWithTag("up").transform.GetChild(1).gameObject;
+    }
 	
 	// Update is called once per frame
 	void Update () {
-        if (!fired)
-            return;
-        if(!returnBool)
+        if(!returnBool && fired)
         {
             velocityX *= 1-Time.deltaTime;
             velocityY -= Mathf.Pow(gravity, 2) * Time.deltaTime;
             transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
             CheckCollision();
         }
-        else
+        else if(returnBool)
         {
-            
+            velocityX *= 1 + Time.deltaTime;
+            velocityY *= 1 + Time.deltaTime;
+            transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
+            if(Vector3.Distance(transform.position, fistPosition.transform.position) <1f)
+            {
+                transform.position = fistPosition.transform.position;
+                transform.parent = fistPosition.transform;
+                fistPosition.GetComponent<PlayerManager>().fists.Add(gameObject);
+                returnBool = false;
+
+            }
+            CheckCollisionReturn();
         }
 	}
 
@@ -37,7 +51,9 @@ public class FistComponent : MonoBehaviour {
         if (hit.transform != null)
         {
             fired = false;
+
             velocityX = 0;
+            gameObject.layer = 0;
             transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
         }
 
@@ -45,9 +61,35 @@ public class FistComponent : MonoBehaviour {
         hit = Physics2D.Raycast(transform.position, transform.up, velocityY * Time.deltaTime);
         if (hit.transform != null)
         {
-            Debug.Log("lol");
             if (velocityY < 0)
                 fired = false;
+            velocityY = 0;
+            gameObject.layer = 0;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
+        }
+    }
+
+    private void CheckCollisionReturn()
+    {
+        // CheckDirection X
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, velocityX * Time.deltaTime);
+        if (hit.transform != null && hit.transform != transform)
+        {
+            returnBool = false;
+            gameObject.layer = 0;
+            velocityX = 0;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
+        }
+
+        // CheckDirection Y
+        hit = Physics2D.Raycast(transform.position, transform.up, velocityY * Time.deltaTime);
+        if (hit.transform != null && hit.transform != transform)
+        {
+            if (velocityY < 0)
+            {
+                returnBool = false;
+                gameObject.layer = 0;
+            }
             velocityY = 0;
             transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
         }
@@ -60,7 +102,8 @@ public class FistComponent : MonoBehaviour {
         velocityX = direction.x;
         velocityY = direction.y;
         returnBool = true;
-        //TODO: Remettre le fist dans le joueur
+        gameObject.layer = 2;
+        Debug.DrawLine(transform.position, transform.position + direction * 5f, Color.red, 10f);
     }
 
     public void Fire(Vector3 direction)
@@ -70,5 +113,6 @@ public class FistComponent : MonoBehaviour {
         velocityY = direction.y;
         fired = true;
         transform.parent = null;
+
     }
 }

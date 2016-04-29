@@ -15,7 +15,7 @@ public class PlayerManager : MonoBehaviour {
     [Header("Body Parts")]
     public UpBody upBody;
     public DownBody downBody;
-    public GameManager fistPosition;
+    public GameObject fistPosition;
     public List<GameObject> fists = new List<GameObject>();
 
     [Header("Movement variables")]
@@ -122,16 +122,16 @@ public class PlayerManager : MonoBehaviour {
         {
             FireArm();
         }
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(1))
         {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
-            {
-                if (hit.transform.tag == "hand")
-                {
-                    hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
-                }
+            Debug.Log("return");
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+            if (hit.collider != null && hit.transform.tag == "hand")
+            { 
+                Debug.Log("worked");
+
+                hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
             }
         }
     }
