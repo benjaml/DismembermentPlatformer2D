@@ -21,14 +21,14 @@ public class PlayerManager : MonoBehaviour {
     [Header("Movement variables")]
     private float speed = 7f;
     private float gravity = 10.0f ;
-    public bool isGrounded = true;
-    private float jumpForce = 0.1f;
+    public bool isGrounded = false;
+    public float jumpForce = 0.1f;
     private float jumpLength = 1f;
     private float jumpStart;
     private bool jumping;
 
     // Private variables
-    Vector2 movement = Vector2.zero;
+    public Vector2 movement = Vector2.zero;
     public float gravityVelocity = 0.0f;
     public float gravityOnlyVelocity = 0.0f;
     public float jumpImpulsion = 0f;
@@ -45,46 +45,38 @@ public class PlayerManager : MonoBehaviour {
         // reset movement variable
         appliedForce = false;
         movement = Vector2.zero;
-
-        checkGravity();
-        checkInput();
-        applyMovement();
+        if (currentState == state.FullBody)
+        {
+            checkInput();
+            checkGravity();
+            applyMovement();
+        }
+        else
+        {
+            checkInput();
+            upBody.checkGravity();
+            downBody.checkGravity();
+            upBody.applyMovement();
+            downBody.applyMovement();
+            if (Vector3.Distance(transform.position + (Vector3)movement, downBody.transform.position) < 1.0f)
+            {
+                PutTogether();
+                return;
+            }
+        }
 	}
 
     void checkGravity()
     {
-        if(currentState == state.FullBody)
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, -transform.up, 1.0f);
+        if (hit.transform != null)
         {
-            RaycastHit2D hit = Physics2D.Raycast(downBody.transform.position, -transform.up, 0.5f);
-            Debug.DrawLine(downBody.transform.position, downBody.transform.position - transform.up * 0.5f);
-            if (hit.transform != null)
-            {
-                isGrounded = true;
+            isGrounded = true;
+            if(gravityVelocity < 0.0f)
                 gravityVelocity = 0f;
-                //downBody.transform.position = (Vector3)hit.point + Vector3.up * 0.5f;
-                //upBody.transform.position = (Vector3)hit.point + Vector3.up * 1.5f;
-            }
-
         }
         else
-        {
-            RaycastHit2D hit = Physics2D.Raycast(upBody.transform.position, -transform.up, 0.5f);
-            Debug.DrawLine(upBody.transform.position, upBody.transform.position - transform.up * 0.5f);
-            if (hit.transform != null)
-            {
-                upBody.isGrounded = true;
-                gravityVelocity = 0f;
-                upBody.transform.position = (Vector3)hit.point + Vector3.up*0.5f;
-            }
-            hit = Physics2D.Raycast(downBody.transform.position, -transform.up, 0.5f);
-            Debug.DrawLine(downBody.transform.position, downBody.transform.position - transform.up * 0.5f);
-            if (hit.transform != null)
-            {
-                downBody.isGrounded = true;
-                gravityOnlyVelocity = 0f;
-                downBody.transform.position = (Vector3)hit.point + Vector3.up * 0.5f;
-            }
-        }
+            gravityVelocity -= Time.deltaTime;
     }
     void checkInput()
     {
@@ -93,9 +85,7 @@ public class PlayerManager : MonoBehaviour {
         if(!Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && isGrounded && currentState == state.FullBody)
         {
             Debug.Log("jump");
-            jumpImpulsion = jumpForce;
             isGrounded = false;
-            jumpStart = Time.time;
             jumping = true;
             gravityVelocity = jumpForce;
             appliedForce = true;
@@ -124,14 +114,21 @@ public class PlayerManager : MonoBehaviour {
         }
         if (Input.GetMouseButtonDown(1))
         {
-            Debug.Log("return");
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
-            if (hit.collider != null && hit.transform.tag == "hand")
-            { 
-                Debug.Log("worked");
+            if (hit.collider != null )
+            {
+                if (hit.transform.tag == "hand")
+                {
+                    Debug.Log("worked");
 
-                hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
+                    hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
+                }
+                else if(hit.transform.name == "Button")
+                {
+                    hit.transform.GetComponent<ButtonScript>().Cancel();
+                    hit.transform.GetChild(0).GetChild(0).GetComponent<FistComponent>().Return(fistPosition.transform.position);
+                }
             }
         }
     }
@@ -149,76 +146,42 @@ public class PlayerManager : MonoBehaviour {
 
     void applyMovement()
     {
-        if (currentState == state.FullBody)
-        {
-            if (!isGrounded && !appliedForce)
-            {
-                gravityVelocity -= Mathf.Pow(gravity * Time.deltaTime,2.0f);
-            }
-            movement.y = gravityVelocity;   
-            RaycastHit2D hit = Physics2D.Raycast(transform.position+(Vector3)movement, -Vector3.up, 1.5f);
-            if (hit.transform != null)
-            {
-                float impactY = hit.point.y;
-                movement.y = impactY - transform.position.y + 1.5f;
-            }
-            // on multiplie par la masse qui est de 2 pour le fullbody
-            movement.y *= 2;
-            transform.position += (Vector3)movement;
-        }
+        // CheckDirection X
+        float distX;
+        if(movement.x>0)
+            distX=1+movement.x;
         else
+            distX=-1+movement.x;
+        Debug.DrawRay(transform.position, transform.right * distX, Color.red);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, distX*0.5f);
+        if (hit.transform != null)
         {
-            Vector3 movementDown = Vector3.zero;
-            // check gravity for the upBody
-            if (!upBody.isGrounded && !appliedForce)
-            {
-                gravityVelocity -= Mathf.Pow(gravity* Time.deltaTime,2.0f);
-            }
-            // check gravity for the downBody
-            if (!downBody.isGrounded && !appliedForce)
-            {
-                gravityOnlyVelocity -= Mathf.Pow(gravity * Time.deltaTime, 2.0f);
-            }
-            movement.y = gravityVelocity;
-            movementDown.y = gravityOnlyVelocity;
-
-            // check if there is ground 
-            RaycastHit2D hit = Physics2D.Raycast(upBody.transform.position, -Vector3.up, 1f);
-            if (hit && hit.transform.tag == "ground")
-            {
-                Debug.Log("up hit the ground");
-                float impactY = hit.point.y;
-                movement.y = impactY - upBody.transform.position.y + 1.5f;
-                gravityVelocity = 0.0f;
-                upBody.isGrounded = true;
-            }
-
-            hit = Physics2D.Raycast(downBody.transform.position, -Vector3.up, 1f);
-            if (hit && hit.transform.tag == "ground")
-            {
-                Debug.Log("down hit the ground");
-                float impactY = hit.point.y;
-                movementDown.y = impactY - downBody.transform.position.y + 1.5f;
-                downBody.isGrounded = true;
-                gravityOnlyVelocity = 0.0f;
-            }
-            else if(Vector3.Distance(upBody.transform.position+(Vector3)movement,downBody.transform.position)<1.0f)
-            {
-                PutTogether();
-                return;
-            }
-            if(appliedForce)
-            {
-                Debug.Log(movement.y);
-            }
-            upBody.transform.position += (Vector3)movement;
-            movementDown.x = 0.0f;
-
-            downBody.transform.position += movementDown; 
-            downBody.enabled = true;
-
-            
+            movement.x = 0;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.5f;
         }
+
+        // CheckDirection Y
+        float distY;
+        if(movement.y>0)
+            distY=1+movement.y;
+        else
+            distY=-1+movement.y;
+        Debug.DrawRay(transform.position, transform.up * distY, Color.blue);
+        hit = Physics2D.Raycast(transform.position, transform.up, distY);
+        if (hit.transform != null)
+        {
+            movement.y = 0;
+
+            if (movement.y < 0)
+                isGrounded = true;
+
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal;
+        }
+        movement.y = gravityVelocity;   
+        // on multiplie par la masse qui est de 2 pour le fullbody
+        transform.position += (Vector3)movement;
+        
+            
     }
     public void PutTogether()
     {

@@ -9,13 +9,15 @@ public class FistComponent : MonoBehaviour {
     public float force;
     public float gravity;
     public float friction;
-    public  GameObject fistPosition;
+    public GameObject fistPosition;
+    public GameObject player;
     public bool fired = false;
     public bool returnBool = false;
     
     void Start()
     {
         fistPosition = GameObject.FindGameObjectWithTag("up").transform.GetChild(1).gameObject;
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 	
 	// Update is called once per frame
@@ -36,7 +38,7 @@ public class FistComponent : MonoBehaviour {
             {
                 transform.position = fistPosition.transform.position;
                 transform.parent = fistPosition.transform;
-                fistPosition.GetComponent<PlayerManager>().fists.Add(gameObject);
+                player.GetComponent<PlayerManager>().fists.Add(gameObject);
                 returnBool = false;
 
             }
@@ -51,7 +53,6 @@ public class FistComponent : MonoBehaviour {
         if (hit.transform != null)
         {
             fired = false;
-
             velocityX = 0;
             gameObject.layer = 0;
             transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;

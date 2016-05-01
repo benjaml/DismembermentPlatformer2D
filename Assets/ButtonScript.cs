@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class ButtonScript : MonoBehaviour {
 
     public List<AbstractActivable> tasks = new List<AbstractActivable>();
+    public List<AbstractActivable> cancelTasks = new List<AbstractActivable>();
 
     void Update()
     {
@@ -18,6 +19,7 @@ public class ButtonScript : MonoBehaviour {
     {
         if(col.transform.tag == "hand")
         {
+            col.transform.parent = transform.GetChild(0).transform;
             Activate();
         }
     }
@@ -25,6 +27,13 @@ public class ButtonScript : MonoBehaviour {
     void Activate()
     {
         foreach(AbstractActivable activable in  tasks)
+        {
+            activable.Activate();
+        }
+    }
+    public void Cancel()
+    {
+        foreach (AbstractActivable activable in cancelTasks)
         {
             activable.Activate();
         }
