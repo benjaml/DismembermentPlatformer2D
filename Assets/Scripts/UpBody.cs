@@ -7,7 +7,7 @@ public class UpBody : MonoBehaviour {
     public bool isGrounded = true;
     public float gravity;
     public float jumpForce;
-    public float speed;
+    private float speed = 7f;
     public Vector3 direction;
     public float velocityX;
     public float velocityY;
@@ -17,7 +17,7 @@ public class UpBody : MonoBehaviour {
 
     void Update()
     {
-        if (!launched )
+        /*if (!launched )
         {
             return;
         }
@@ -27,13 +27,15 @@ public class UpBody : MonoBehaviour {
             velocityY -= Mathf.Pow(gravity, 2) * Time.deltaTime;
             transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
             CheckCollision();
-        }
+        }*/
     }
 
 
     private void CheckCollision()
     {
+        Debug.Log("CheckCollision");
         // CheckDirection X
+        Debug.DrawRay(transform.position, transform.right * velocityX * Time.deltaTime, Color.red);
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, velocityX * Time.deltaTime);
         if (hit.transform != null)
         {
@@ -42,6 +44,7 @@ public class UpBody : MonoBehaviour {
         }
 
         // CheckDirection Y
+        Debug.DrawRay(transform.position, transform.up * velocityY * Time.deltaTime, Color.blue);
         hit = Physics2D.Raycast(transform.position, transform.up, velocityY * Time.deltaTime);
         if (hit.transform != null)
         {
@@ -55,6 +58,7 @@ public class UpBody : MonoBehaviour {
 
     public void checkInput()
     {
+        movement = Vector2.zero;
         float h = Input.GetAxisRaw("Horizontal");
         movement += (Vector2)transform.right * h * Time.deltaTime * speed;
     }
@@ -69,38 +73,48 @@ public class UpBody : MonoBehaviour {
             gravityVelocity = 0f;
             transform.position = (Vector3)hit.point + Vector3.up*0.5f;
         }
+        else
+        {
+            isGrounded = false;
+            gravityVelocity -= Time.deltaTime;
+        }
             
     }
     public void applyMovement()
     {
-        // check gravity for the upBody
-        if (!isGrounded && !appliedForce)
+        // CheckDirection X
+        float distX;
+        if (movement.x > 0)
+            distX = 1 + movement.x;
+        else
+            distX = -1 + movement.x;
+        Debug.DrawRay(transform.position, transform.right * distX, Color.red);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, distX * 0.5f);
+        if (hit.transform != null)
         {
-            gravityVelocity -= Mathf.Pow(gravity* Time.deltaTime,2.0f);
+            movement.x = 0;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.5f;
+        }
+
+        // CheckDirection Y
+        float distY;
+        if (gravityVelocity > 0)
+            distY = 1 + gravityVelocity;
+        else
+            distY = -1 + gravityVelocity;
+        Debug.DrawRay(transform.position, transform.up * distY, Color.blue);
+        hit = Physics2D.Raycast(transform.position, transform.up, distY);
+        if (hit.transform != null)
+        {
+            movement.y = 0;
+
+            //if (movement.y < 0)
+            //  isGrounded = false;
+
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal;
         }
         movement.y = gravityVelocity;
-
-        // check if there is ground 
-
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector3.up, 1f);
-        if (hit && hit.transform.tag == "ground")
-        {
-            Debug.Log("up hit the ground");
-            float impactY = hit.point.y;
-            movement.y = impactY - transform.position.y + 1.5f;
-            gravityVelocity = 0.0f;
-            isGrounded = true;
-        }
-        hit = Physics2D.Raycast(transform.position, Vector3.up, 1f);
-        if (hit && hit.transform.tag == "ground")
-        {
-            Debug.Log("up hit the roof");
-            gravityVelocity = 0.0f;
-        }
-        if(appliedForce)
-        {
-            Debug.Log(movement.y);
-        }
+        // on multiplie par la masse qui est de 2 pour le fullbody
         transform.position += (Vector3)movement;
 
             
@@ -108,7 +122,7 @@ public class UpBody : MonoBehaviour {
 
     public void Jump()
     {
-        velocityY = jumpForce;
+        gravityVelocity = jumpForce;
         launched = true;
 
     }

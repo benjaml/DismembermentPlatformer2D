@@ -20,11 +20,9 @@ public class PlayerManager : MonoBehaviour {
 
     [Header("Movement variables")]
     private float speed = 7f;
-    private float gravity = 10.0f ;
+    private float gravity = 2.0f;
     public bool isGrounded = false;
-    public float jumpForce = 0.1f;
-    private float jumpLength = 1f;
-    private float jumpStart;
+    private float jumpForce = 0.3f;
     private bool jumping;
 
     // Private variables
@@ -53,12 +51,13 @@ public class PlayerManager : MonoBehaviour {
         }
         else
         {
-            checkInput();
+            upBody.checkInput();
             upBody.checkGravity();
             downBody.checkGravity();
             upBody.applyMovement();
             downBody.applyMovement();
-            if (Vector3.Distance(transform.position + (Vector3)movement, downBody.transform.position) < 1.0f)
+
+            if (Vector3.Distance(upBody.transform.position, downBody.transform.position) < 1f)
             {
                 PutTogether();
                 return;
@@ -76,7 +75,10 @@ public class PlayerManager : MonoBehaviour {
                 gravityVelocity = 0f;
         }
         else
-            gravityVelocity -= Time.deltaTime;
+        {
+            isGrounded = false;
+            gravityVelocity -= Time.deltaTime*gravity;
+        }
     }
     void checkInput()
     {
@@ -97,14 +99,8 @@ public class PlayerManager : MonoBehaviour {
         if ((Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && upBody.isGrounded) || (Input.GetKeyDown(KeyCode.Space) && !isGrounded && currentState == state.FullBody))
         {
             Debug.Log("special jump");
-            jumpImpulsion = jumpForce;
-            jumpStart = Time.time;
             currentState = state.Separate;
-            gravityVelocity = jumpForce*2.0f;
-            appliedForce = true;
-            gravityOnlyVelocity = 0.0f;
-            downBody.isGrounded = isGrounded;
-            upBody.isGrounded = false;
+            upBody.Jump();
             downBody.SetInertie(movement.x/Time.deltaTime);
 
         }
@@ -152,8 +148,8 @@ public class PlayerManager : MonoBehaviour {
             distX=1+movement.x;
         else
             distX=-1+movement.x;
-        Debug.DrawRay(transform.position, transform.right * distX, Color.red);
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, distX*0.5f);
+        Debug.DrawRay(downBody.transform.position + Vector3.up * 0.5f, transform.right * distX, Color.red);
+        RaycastHit2D hit = Physics2D.Raycast(downBody.transform.position+Vector3.up*0.5f, transform.right, distX * 0.5f);
         if (hit.transform != null)
         {
             movement.x = 0;
@@ -162,18 +158,18 @@ public class PlayerManager : MonoBehaviour {
 
         // CheckDirection Y
         float distY;
-        if(movement.y>0)
-            distY=1+movement.y;
+        if (gravityVelocity > 0)
+            distY = 1 + gravityVelocity;
         else
-            distY=-1+movement.y;
-        Debug.DrawRay(transform.position, transform.up * distY, Color.blue);
-        hit = Physics2D.Raycast(transform.position, transform.up, distY);
+            distY = -1 + gravityVelocity;
+        Debug.DrawRay(downBody.transform.position + Vector3.up * 0.5f, transform.up * distY, Color.blue);
+        hit = Physics2D.Raycast(downBody.transform.position+Vector3.up*0.5f, transform.up, distY);
         if (hit.transform != null)
         {
             movement.y = 0;
 
-            if (movement.y < 0)
-                isGrounded = true;
+            //if (movement.y < 0)
+              //  isGrounded = false;
 
             transform.position = (Vector3)hit.point + (Vector3)hit.normal;
         }
@@ -191,6 +187,7 @@ public class PlayerManager : MonoBehaviour {
         currentState = state.FullBody;
         gravityVelocity = 0.0f;
         upBody.isGrounded = true;
+        upBody.launched = false;
     }
 
     
