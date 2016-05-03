@@ -35,12 +35,18 @@ public class DownBody : MonoBehaviour {
         {
             isGrounded = true;
             gravityVelocity = 0f;
-            transform.position = (Vector3)hit.point + Vector3.up * 0.5f;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.5f;
+        }
+        else
+        {
+            isGrounded = false;
+            gravityVelocity -= Time.deltaTime;
         }
     }
 
     public void applyMovement()
     {
+        // TODO : check right and left collision
         Vector3 movementDown = Vector3.zero;
         // check gravity for the downBody
         if (!isGrounded && !appliedForce)
@@ -50,7 +56,7 @@ public class DownBody : MonoBehaviour {
         movementDown.y = gravityVelocity;
 
         // check if there is ground 
-
+        Debug.DrawRay(transform.position, -Vector3.up, Color.blue);
         RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector3.up, 1f);
         if (hit && hit.transform.tag == "ground")
         {

@@ -14,48 +14,6 @@ public class UpBody : MonoBehaviour {
     private Vector2 movement;
 
 
-
-    void Update()
-    {
-        /*if (!launched )
-        {
-            return;
-        }
-        else 
-        {
-            velocityX *= 1 - Time.deltaTime;
-            velocityY -= Mathf.Pow(gravity, 2) * Time.deltaTime;
-            transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
-            CheckCollision();
-        }*/
-    }
-
-
-    private void CheckCollision()
-    {
-        Debug.Log("CheckCollision");
-        // CheckDirection X
-        Debug.DrawRay(transform.position, transform.right * velocityX * Time.deltaTime, Color.red);
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, velocityX * Time.deltaTime);
-        if (hit.transform != null)
-        {
-            velocityX = 0;
-            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
-        }
-
-        // CheckDirection Y
-        Debug.DrawRay(transform.position, transform.up * velocityY * Time.deltaTime, Color.blue);
-        hit = Physics2D.Raycast(transform.position, transform.up, velocityY * Time.deltaTime);
-        if (hit.transform != null)
-        {
-            if (velocityY < 0)
-                isGrounded = true;
-            velocityY = 0;
-            gameObject.layer = 0;
-            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
-        }
-    }
-
     public void checkInput()
     {
         movement = Vector2.zero;
@@ -99,19 +57,19 @@ public class UpBody : MonoBehaviour {
         // CheckDirection Y
         float distY;
         if (gravityVelocity > 0)
-            distY = 1 + gravityVelocity;
+            distY = 0.5f + gravityVelocity;
         else
-            distY = -1 + gravityVelocity;
+            distY = -0.5f + gravityVelocity;
         Debug.DrawRay(transform.position, transform.up * distY, Color.blue);
         hit = Physics2D.Raycast(transform.position, transform.up, distY);
         if (hit.transform != null)
         {
             movement.y = 0;
 
-            //if (movement.y < 0)
-            //  isGrounded = false;
+            if (gravityVelocity < 0)
+              isGrounded = true;
 
-            transform.position = (Vector3)hit.point + (Vector3)hit.normal;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal*0.5f;
         }
         movement.y = gravityVelocity;
         // on multiplie par la masse qui est de 2 pour le fullbody

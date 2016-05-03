@@ -51,25 +51,27 @@ public class PlayerManager : MonoBehaviour {
         }
         else
         {
+            if (Vector3.Distance(upBody.transform.position, downBody.transform.position) < 1f)
+            {
+                PutTogether();
+                return;
+            }
             upBody.checkInput();
             upBody.checkGravity();
             downBody.checkGravity();
             upBody.applyMovement();
             downBody.applyMovement();
 
-            if (Vector3.Distance(upBody.transform.position, downBody.transform.position) < 1f)
-            {
-                PutTogether();
-                return;
-            }
         }
 	}
 
     void checkGravity()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, -transform.up, 1.0f);
+        Debug.DrawRay(downBody.transform.position, -transform.up*0.6f, Color.blue);
+        RaycastHit2D hit = Physics2D.Raycast(downBody.transform.position, -transform.up, 0.6f);
         if (hit.transform != null)
         {
+            Debug.Log("Grounded");
             isGrounded = true;
             if(gravityVelocity < 0.0f)
                 gravityVelocity = 0f;
@@ -182,12 +184,21 @@ public class PlayerManager : MonoBehaviour {
     public void PutTogether()
     {
         Debug.Log("fusion");
+
+        Vector3 upBodyPos = upBody.transform.position;
+        Vector3 downBodyPos = downBody.transform.position;
+        transform.position = downBodyPos + Vector3.up * 0.5f;
+        downBody.transform.position = downBodyPos;
+        upBody.transform.position = upBodyPos;
+
+
         downBody.StopMovement();
         upBody.transform.position = downBody.transform.position + Vector3.up;
         currentState = state.FullBody;
         gravityVelocity = 0.0f;
         upBody.isGrounded = true;
         upBody.launched = false;
+        isGrounded = true;
     }
 
     
