@@ -13,8 +13,9 @@ public class DownBody : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(moveAlone)
+        /*if(moveAlone)
             transform.position += new Vector3(inertie*Time.deltaTime, 0.0f, 0.0f);
+         */
 	}
 
     public void SetInertie(float speed)
@@ -48,6 +49,19 @@ public class DownBody : MonoBehaviour {
     {
         // TODO : check right and left collision
         Vector3 movementDown = Vector3.zero;
+        movementDown.x = inertie*Time.deltaTime;
+        float distX;
+        if (movementDown.x > 0)
+            distX = 1 + movementDown.x;
+        else
+            distX = -1 + movementDown.x;
+        Debug.DrawRay(transform.position, transform.right * distX, Color.red);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, distX * 0.5f);
+        if (hit.transform != null)
+        {
+            movementDown.x = 0;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.5f;
+        }
         // check gravity for the downBody
         if (!isGrounded && !appliedForce)
         {
@@ -57,7 +71,7 @@ public class DownBody : MonoBehaviour {
 
         // check if there is ground 
         Debug.DrawRay(transform.position, -Vector3.up, Color.blue);
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector3.up, 1f);
+        hit = Physics2D.Raycast(transform.position, -Vector3.up, 1f);
         if (hit && hit.transform.tag == "ground")
         {
             Debug.Log("down hit the ground");
@@ -66,8 +80,6 @@ public class DownBody : MonoBehaviour {
             isGrounded = true;
             gravityVelocity = 0.0f;
         }
-        else 
-        movementDown.x = 0.0f;
 
         transform.position += movementDown; 
         enabled = true;

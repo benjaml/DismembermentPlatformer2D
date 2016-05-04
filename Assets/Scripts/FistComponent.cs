@@ -13,6 +13,7 @@ public class FistComponent : MonoBehaviour {
     public GameObject player;
     public bool fired = false;
     public bool returnBool = false;
+    public bool enableGravity = false;
     
     void Start()
     {
@@ -44,29 +45,36 @@ public class FistComponent : MonoBehaviour {
             }
             CheckCollisionReturn();
         }
+        if(enableGravity)
+        {
+            velocityY -= Mathf.Pow(gravity, 2) * Time.deltaTime;
+            transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
+            CheckCollisionGravityOnly();
+            Debug.Log("gravityOnly");
+        }
 	}
 
     private void CheckCollision()
     {
         // CheckDirection X
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, velocityX*Time.deltaTime);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, 0.15f * velocityX * Time.deltaTime);
         if (hit.transform != null)
         {
             fired = false;
             velocityX = 0;
             gameObject.layer = 0;
-            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
+            transform.position = (Vector3)hit.point;
         }
 
         // CheckDirection Y
-        hit = Physics2D.Raycast(transform.position, transform.up, velocityY * Time.deltaTime);
+        hit = Physics2D.Raycast(transform.position, transform.up, 0.15f*velocityY * Time.deltaTime);
         if (hit.transform != null)
         {
             if (velocityY < 0)
                 fired = false;
             velocityY = 0;
             gameObject.layer = 0;
-            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
+            transform.position = (Vector3)hit.point;
         }
     }
 
@@ -95,6 +103,17 @@ public class FistComponent : MonoBehaviour {
             transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.15f;
         }
     }
+    private void CheckCollisionGravityOnly()
+    {
+       
+        // CheckDirection Y
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.up, velocityY * Time.deltaTime);
+        if (hit.transform != null && hit.transform != transform)
+        {
+            velocityY = 0;
+        }
+        transform.position += Vector3.up*velocityY;
+    }
 
     public void Return(Vector3 position)
     {
@@ -103,6 +122,7 @@ public class FistComponent : MonoBehaviour {
         velocityX = direction.x;
         velocityY = direction.y;
         returnBool = true;
+        enableGravity = false;
         gameObject.layer = 2;
         Debug.DrawLine(transform.position, transform.position + direction * 5f, Color.red, 10f);
     }
@@ -113,6 +133,7 @@ public class FistComponent : MonoBehaviour {
         velocityX = direction.x;
         velocityY = direction.y;
         fired = true;
+        enableGravity = false;
         transform.parent = null;
 
     }

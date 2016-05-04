@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using UnityEditor;
 
 public class PlayerManager : MonoBehaviour {
 
@@ -40,6 +41,10 @@ public class PlayerManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if(Input.GetKeyDown(KeyCode.P))
+        {
+            EditorApplication.isPaused = !EditorApplication.isPaused;
+        }
         // reset movement variable
         appliedForce = false;
         movement = Vector2.zero;
@@ -122,10 +127,9 @@ public class PlayerManager : MonoBehaviour {
 
                     hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
                 }
-                else if(hit.transform.name == "Button")
+                else if (hit.transform.name == "Button" && hit.transform.GetChild(0).GetChild(0) != null)
                 {
                     hit.transform.GetComponent<ButtonScript>().Cancel();
-                    hit.transform.GetChild(0).GetChild(0).GetComponent<FistComponent>().Return(fistPosition.transform.position);
                 }
             }
         }
