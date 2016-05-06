@@ -107,7 +107,6 @@ public class FistComponent : MonoBehaviour {
     {
        
         // CheckDirection Y
-        Debug.Log(Vector3.up * velocityY);
         Debug.DrawRay(transform.position-Vector3.up*0.5f, Vector3.up * velocityY,Color.blue);
         RaycastHit2D hit = Physics2D.Raycast(transform.position - Vector3.up * 0.5f, Vector3.up, velocityY);
         if (hit.transform != null && hit.transform != transform)

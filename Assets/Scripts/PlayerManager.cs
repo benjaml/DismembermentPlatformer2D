@@ -32,6 +32,7 @@ public class PlayerManager : MonoBehaviour {
     public float gravityOnlyVelocity = 0.0f;
     public float jumpImpulsion = 0f;
     private Vector3 vel;
+    private bool atracted;
 
     bool appliedForce = false;
 	// Use this for initialization
@@ -113,7 +114,10 @@ public class PlayerManager : MonoBehaviour {
         }
         if(Input.GetMouseButtonDown(0))
         {
-            FireArm();
+            if (Input.GetKey(KeyCode.LeftControl))
+                Attract();
+            else
+                FireArm();
         }
         if (Input.GetMouseButtonDown(1))
         {
@@ -141,7 +145,17 @@ public class PlayerManager : MonoBehaviour {
             return;
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mousePos.z = transform.position.z;
-        Vector3 direction = mousePos - upBody.transform.position; 
+        Vector3 direction = mousePos - upBody.transform.position;
+        fists[0].GetComponent<FistComponent>().Fire(direction.normalized);
+        fists.RemoveAt(0);
+    }
+    private void Attract()
+    {
+        if (fists.Count == 0)
+            return;
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = transform.position.z;
+        Vector3 direction = mousePos - upBody.transform.position;
         fists[0].GetComponent<FistComponent>().Fire(direction.normalized);
         fists.RemoveAt(0);
     }
