@@ -9,8 +9,17 @@ public class UnPressedButton : AbstractActivable
         GetComponent<Animator>().SetTrigger("unpress");
         if (transform.GetChild(0).GetChild(0).tag == "hand")
         {
-            transform.GetChild(0).GetChild(0).position -= Vector3.up*0.15f;
-            transform.GetChild(0).GetChild(0).GetComponent<FistComponent>().enableGravity = true;
+
+            Invoke("release", 0.2f);
         }
+    }
+    
+    void release()
+    {
+        GameObject tmp = transform.GetChild(0).GetChild(0).gameObject;
+        tmp.transform.position -= Vector3.up*0.15f;
+        tmp.GetComponent<FistComponent>().enableGravity = true;
+        tmp.GetComponent<FistComponent>().velocityY = 0;
+        tmp.transform.parent = null;
     }
 }

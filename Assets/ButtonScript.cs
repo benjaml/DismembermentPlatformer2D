@@ -17,7 +17,7 @@ public class ButtonScript : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D col)
     {
-        if(col.transform.tag == "hand")
+        if(col.transform.tag == "hand" && !col.GetComponent<FistComponent>().enableGravity)
         {
             col.transform.parent = transform.GetChild(0).transform;
             Activate();

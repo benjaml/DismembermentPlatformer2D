@@ -47,7 +47,7 @@ public class FistComponent : MonoBehaviour {
         }
         if(enableGravity)
         {
-            velocityY -= Mathf.Pow(gravity, 2) * Time.deltaTime;
+            velocityY -= Time.deltaTime;
             transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
             CheckCollisionGravityOnly();
             Debug.Log("gravityOnly");
@@ -107,10 +107,15 @@ public class FistComponent : MonoBehaviour {
     {
        
         // CheckDirection Y
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.up, velocityY * Time.deltaTime);
+        Debug.Log(Vector3.up * velocityY);
+        Debug.DrawRay(transform.position-Vector3.up*0.5f, Vector3.up * velocityY,Color.blue);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position - Vector3.up * 0.5f, Vector3.up, velocityY);
         if (hit.transform != null && hit.transform != transform)
         {
+            if (velocityY < 0)
+                enableGravity = false;
             velocityY = 0;
+            transform.position = (Vector3)(hit.point + hit.normal * 0.15f);
         }
         transform.position += Vector3.up*velocityY;
     }
