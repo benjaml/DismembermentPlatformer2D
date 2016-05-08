@@ -24,7 +24,7 @@ public class PlayerManager : MonoBehaviour {
     private float speed = 7f;
     private float gravity = 2.0f;
     public bool isGrounded = false;
-    private float jumpForce = 0.3f;
+    private float jumpForce = 0.25f;
     private bool jumping;
 
     // Private variables

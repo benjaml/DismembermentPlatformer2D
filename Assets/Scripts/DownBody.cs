@@ -57,7 +57,7 @@ public class DownBody : MonoBehaviour {
             distX = -1 + movementDown.x;
         Debug.DrawRay(transform.position, transform.right * distX, Color.red);
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, distX * 0.5f);
-        if (hit.transform != null)
+        if (hit.transform != null && hit.transform.tag != "movable")
         {
             movementDown.x = 0;
             transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.5f;
