@@ -18,6 +18,7 @@ public class PlayerManager : MonoBehaviour {
     public DownBody downBody;
     public GameObject fistPosition;
     public List<GameObject> fists = new List<GameObject>();
+    public bool atracted;
 
     [Header("Movement variables")]
     private float speed = 7f;
@@ -32,7 +33,7 @@ public class PlayerManager : MonoBehaviour {
     public float gravityOnlyVelocity = 0.0f;
     public float jumpImpulsion = 0f;
     private Vector3 vel;
-    private bool atracted;
+    private Vector3 attractedDirection = Vector3.zero;
 
     bool appliedForce = false;
 	// Use this for initialization
@@ -46,28 +47,45 @@ public class PlayerManager : MonoBehaviour {
         {
             EditorApplication.isPaused = !EditorApplication.isPaused;
         }
-        // reset movement variable
-        appliedForce = false;
-        movement = Vector2.zero;
-        if (currentState == state.FullBody)
+        if(atracted)
         {
+
+            // applymovemnt and check collision
+            movement = attractedDirection * speed * Time.deltaTime;
             checkInput();
-            checkGravity();
             applyMovement();
+            //check is still cliking
+            if (!IsStillAttracted())
+            {
+                atracted = false;
+            }
+            return;
         }
         else
         {
-            if (Vector3.Distance(upBody.transform.position, downBody.transform.position) < 1f)
+            // reset movement variable
+            appliedForce = false;
+            movement = Vector2.zero;
+            if (currentState == state.FullBody)
             {
-                PutTogether();
-                return;
+                checkInput();
+                checkGravity();
+                applyMovement();
             }
-            upBody.checkInput();
-            upBody.checkGravity();
-            downBody.checkGravity();
-            upBody.applyMovement();
-            downBody.applyMovement();
+            else
+            {
+                if (Vector3.Distance(upBody.transform.position, downBody.transform.position) < 1f)
+                {
+                    PutTogether();
+                    return;
+                }
+                upBody.checkInput();
+                upBody.checkGravity();
+                downBody.checkGravity();
+                upBody.applyMovement();
+                downBody.applyMovement();
 
+            }
         }
 	}
 
@@ -88,52 +106,98 @@ public class PlayerManager : MonoBehaviour {
             gravityVelocity -= Time.deltaTime*gravity;
         }
     }
+
+    bool IsStillAttracted()
+    {
+        return Input.GetKey(KeyCode.LeftControl);
+    }
+
     void checkInput()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        movement += (Vector2)transform.right * h * Time.deltaTime * speed;
-        if(!Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && isGrounded && currentState == state.FullBody)
+        if(atracted)
         {
-            Debug.Log("jump");
-            isGrounded = false;
-            jumping = true;
-            gravityVelocity = jumpForce;
-            appliedForce = true;
-
-            // return pour qu'il ne fasse pas le 2eme if pour un saut normal en gounded
-            return;
-
-        }
-        if ((Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && upBody.isGrounded) || (Input.GetKeyDown(KeyCode.Space) && !isGrounded && currentState == state.FullBody))
-        {
-            Debug.Log("special jump");
-            currentState = state.Separate;
-            upBody.Jump();
-            downBody.SetInertie(movement.x/Time.deltaTime);
-
-        }
-        if(Input.GetMouseButtonDown(0))
-        {
-            if (Input.GetKey(KeyCode.LeftControl))
-                Attract();
-            else
-                FireArm();
-        }
-        if (Input.GetMouseButtonDown(1))
-        {
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
-            if (hit.collider != null )
+            if (Input.GetMouseButtonDown(0))
             {
-                if (hit.transform.tag == "hand")
-                {
-                    Debug.Log("worked");
+                FireArm();
+            }
+            if (Input.GetMouseButtonDown(1))
+            {
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
-                    hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
-                }
-                else if (hit.transform.name == "Button" && hit.transform.GetChild(0).GetChild(0) != null)
+                if (hit.collider != null)
                 {
-                    hit.transform.GetComponent<ButtonScript>().Cancel();
+                    if (hit.transform.tag == "hand")
+                    {
+                        Debug.Log("worked");
+
+                        hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
+                    }
+                    else if (hit.transform.name == "Button" && hit.transform.GetChild(0).GetChild(0) != null)
+                    {
+                        hit.transform.GetComponent<ButtonScript>().Cancel();
+                    }
+                }
+            }
+        }
+        else
+        {
+            float h = Input.GetAxisRaw("Horizontal");
+            movement += (Vector2)transform.right * h * Time.deltaTime * speed;
+            if(!Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && isGrounded && currentState == state.FullBody)
+            {
+                Debug.Log("jump");
+                isGrounded = false;
+                jumping = true;
+                gravityVelocity = jumpForce;
+                appliedForce = true;
+
+                // return pour qu'il ne fasse pas le 2eme if pour un saut normal en gounded
+                return;
+
+            }
+            if ((Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && upBody.isGrounded) || (Input.GetKeyDown(KeyCode.Space) && !isGrounded && currentState == state.FullBody))
+            {
+                Debug.Log("special jump");
+                currentState = state.Separate;
+                upBody.Jump();
+                downBody.SetInertie(movement.x/Time.deltaTime);
+
+            }
+            if(Input.GetMouseButtonDown(0))
+            {
+                FireArm();
+            }
+            if (Input.GetMouseButtonDown(1))
+            {
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+                if (hit.collider != null )
+                {
+                    if (!Input.GetKey(KeyCode.LeftControl))
+                    {
+                        if (hit.transform.tag == "hand")
+                        {
+                            Debug.Log("worked");
+
+                            hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
+                        }
+                        else if (hit.transform.name == "Button" && hit.transform.GetChild(0).GetChild(0) != null)
+                        {
+                            hit.transform.GetComponent<ButtonScript>().Cancel();
+                        }
+
+                    }
+                    else
+                    {
+                        if (hit.transform.tag == "hand")
+                        {
+                            Attract(hit.point);
+                        }
+                        else if (hit.transform.name == "Button" && hit.transform.GetChild(0).GetChild(0) != null)
+                        {
+                            Attract(hit.point);
+                        }
+                    }
                 }
             }
         }
@@ -149,15 +213,12 @@ public class PlayerManager : MonoBehaviour {
         fists[0].GetComponent<FistComponent>().Fire(direction.normalized);
         fists.RemoveAt(0);
     }
-    private void Attract()
+    private void Attract(Vector3 positionToGo)
     {
-        if (fists.Count == 0)
-            return;
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = transform.position.z;
-        Vector3 direction = mousePos - upBody.transform.position;
-        fists[0].GetComponent<FistComponent>().Fire(direction.normalized);
-        fists.RemoveAt(0);
+        atracted = true;
+        attractedDirection = positionToGo - transform.position;
+        attractedDirection.Normalize();
+
     }
 
     void applyMovement()
@@ -173,27 +234,39 @@ public class PlayerManager : MonoBehaviour {
         if (hit.transform != null)
         {
             movement.x = 0;
+            if (atracted)
+                attractedDirection = Vector3.zero;
             transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.5f;
         }
 
         // CheckDirection Y
         float distY;
-        if (gravityVelocity > 0)
-            distY = 1 + gravityVelocity;
+        if(!atracted)
+        {
+            if (gravityVelocity > 0)
+                distY = 1 + gravityVelocity;
+            else
+                distY = -1 + gravityVelocity;
+        }
         else
-            distY = -1 + gravityVelocity;
+        {
+            if (movement.y > 0)
+                distY = 1 + movement.y;
+            else
+                distY = -1 + movement.y;
+        }
         Debug.DrawRay(downBody.transform.position + Vector3.up * 0.5f, transform.up * distY, Color.blue);
         hit = Physics2D.Raycast(downBody.transform.position+Vector3.up*0.5f, transform.up, distY);
         if (hit.transform != null)
         {
             movement.y = 0;
-
-            //if (movement.y < 0)
-              //  isGrounded = false;
+            if (atracted)
+                attractedDirection = Vector3.zero;
 
             transform.position = (Vector3)hit.point + (Vector3)hit.normal;
         }
-        movement.y = gravityVelocity;   
+        if(!atracted)
+            movement.y = gravityVelocity;   
         // on multiplie par la masse qui est de 2 pour le fullbody
         transform.position += (Vector3)movement;
         

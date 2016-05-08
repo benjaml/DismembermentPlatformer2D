@@ -63,7 +63,7 @@ public class FistComponent : MonoBehaviour {
             fired = false;
             velocityX = 0;
             gameObject.layer = 0;
-            transform.position = (Vector3)hit.point;
+            transform.position = (Vector3)hit.point+(Vector3)hit.normal*0.1f;
         }
 
         // CheckDirection Y
@@ -74,7 +74,7 @@ public class FistComponent : MonoBehaviour {
                 fired = false;
             velocityY = 0;
             gameObject.layer = 0;
-            transform.position = (Vector3)hit.point;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.1f;
         }
     }
 

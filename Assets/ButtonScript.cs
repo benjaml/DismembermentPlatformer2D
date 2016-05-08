@@ -20,6 +20,7 @@ public class ButtonScript : MonoBehaviour {
         if(col.transform.tag == "hand" && !col.GetComponent<FistComponent>().enableGravity)
         {
             col.transform.parent = transform.GetChild(0).transform;
+            col.transform.position = col.transform.parent.position - Vector3.up*.5f;
             Activate();
         }
     }
