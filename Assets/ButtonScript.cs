@@ -23,6 +23,10 @@ public class ButtonScript : MonoBehaviour {
             col.transform.position = col.transform.parent.position - Vector3.up*.5f;
             Activate();
         }
+        if (col.transform.tag == "movable")
+        {
+            Activate();
+        }
     }
 
     void Activate()

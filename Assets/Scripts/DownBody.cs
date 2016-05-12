@@ -32,7 +32,7 @@ public class DownBody : MonoBehaviour {
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, -transform.up, 0.5f);
         Debug.DrawLine(transform.position, transform.position - transform.up * 0.5f);
-        if (hit.transform != null)
+        if (hit.transform != null && hit.transform.tag != "movable")
         {
             isGrounded = true;
             gravityVelocity = 0f;
@@ -57,7 +57,7 @@ public class DownBody : MonoBehaviour {
             distX = -1 + movementDown.x;
         Debug.DrawRay(transform.position, transform.right * distX, Color.red);
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, distX * 0.5f);
-        if (hit.transform != null && hit.transform.tag != "movable")
+        if (hit.transform != null )
         {
             movementDown.x = 0;
             transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.5f;
@@ -72,7 +72,7 @@ public class DownBody : MonoBehaviour {
         // check if there is ground 
         Debug.DrawRay(transform.position, -Vector3.up, Color.blue);
         hit = Physics2D.Raycast(transform.position, -Vector3.up, 1f);
-        if (hit && hit.transform.tag == "ground")
+        if (hit && hit.transform.tag == "ground" )
         {
             Debug.Log("down hit the ground");
             float impactY = hit.point.y;

@@ -160,7 +160,8 @@ public class PlayerManager : MonoBehaviour {
                 Debug.Log("special jump");
                 currentState = state.Separate;
                 upBody.Jump();
-                downBody.SetInertie(movement.x/Time.deltaTime);
+                if(downBody.isGrounded)
+                    downBody.SetInertie(movement.x/Time.deltaTime);
 
             }
             if(Input.GetMouseButtonDown(0))
@@ -218,6 +219,7 @@ public class PlayerManager : MonoBehaviour {
         atracted = true;
         attractedDirection = positionToGo - transform.position;
         attractedDirection.Normalize();
+        movement = attractedDirection * speed * Time.deltaTime;
 
     }
 
@@ -272,6 +274,7 @@ public class PlayerManager : MonoBehaviour {
         
             
     }
+
     public void PutTogether()
     {
         Debug.Log("fusion");
