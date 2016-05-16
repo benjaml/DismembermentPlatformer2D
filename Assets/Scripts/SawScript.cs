@@ -18,7 +18,8 @@ public class SawScript : MonoBehaviour {
     void OnTriggerEnter2D(Collider2D collider)
     {
         if(collider.transform.tag == "up" || collider.transform.tag == "down")
-        Debug.Log("Reload");
-        GameManager.instance.Reload();
+        { 
+            GameManager.instance.Reload();
+        }
     }
 }

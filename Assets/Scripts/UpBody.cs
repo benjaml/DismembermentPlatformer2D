@@ -12,12 +12,13 @@ public class UpBody : MonoBehaviour {
     public Vector3 direction;
     public float velocityX;
     public float velocityY;
-    private Vector2 movement;
+    public Vector2 movement;
+    public float moydt;
 
     private GameObject fistPosition;
     private List<GameObject> fists;
-    private bool atracted;
-    private Vector3 attractedDirection;
+    public bool atracted;
+    public Vector3 attractedDirection;
 
     void Start()
     {
@@ -45,7 +46,6 @@ public class UpBody : MonoBehaviour {
                 {
                     if (hit.transform.tag == "hand")
                     {
-                        Debug.Log("worked");
 
                         hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
                     }
@@ -78,6 +78,11 @@ public class UpBody : MonoBehaviour {
         Vector3 direction = mousePos - transform.position;
         fists[0].GetComponent<FistComponent>().Fire(direction.normalized);
         fists.RemoveAt(0);
+        if (mousePos.x > transform.position.x)
+            transform.localScale = Vector3.one;
+        else if (mousePos.x < transform.position.x)
+            transform.localScale = new Vector3(-1f, 1f, 1f);
+        transform.GetChild(0).GetComponent<Animator>().SetTrigger("shoot");
     }
     private void Attract(Vector3 positionToGo)
     {
@@ -105,7 +110,7 @@ public class UpBody : MonoBehaviour {
         }
             
     }
-    public void applyMovement()
+   /* public void applyMovement()
     {
         if(atracted)
         {
@@ -154,13 +159,85 @@ public class UpBody : MonoBehaviour {
         transform.position += (Vector3)movement;
 
             
+    }*/
+    public void applyMovement()
+    {
+        if (atracted)
+        {
+            movement = attractedDirection * speed * Time.deltaTime;
+            if (!IsStillAttracted())
+            {
+                gravityVelocity = 0;
+                atracted = false;
+                return;
+            }
+        }
+        // CheckDirection X
+        float distX;
+        if (movement.x > 0)
+            distX = 0.5f + movement.x;
+        else
+            distX = -0.5f + movement.x;
+        Debug.DrawRay(transform.position, transform.right * distX, Color.red);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, distX * 0.5f);
+        if (hit.transform != null)
+        {
+            movement.x = 0;
+            if (atracted)
+                attractedDirection = Vector3.zero;
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.5f;
+        }
+
+        // CheckDirection Y
+        float distY;
+        if (!atracted)
+        {
+            if (gravityVelocity > 0)
+                distY = 0.5f + gravityVelocity;
+            else
+                distY = -0.5f + gravityVelocity;
+        }
+        else
+        {
+            if (movement.y > 0)
+                distY = 0.5f + movement.y;
+            else
+                distY = -0.5f + movement.y;
+        }
+        Debug.DrawRay(transform.position, transform.up * distY, Color.blue);
+        hit = Physics2D.Raycast(transform.position, transform.up, distY);
+        if (hit.transform != null)
+        {
+            movement.y = 0;
+            if (atracted)
+                attractedDirection = Vector3.zero;
+
+            transform.position = (Vector3)hit.point + (Vector3)hit.normal*0.5f;
+        }
+        if (!atracted)
+            movement.y = gravityVelocity;
+        // on multiplie par la masse qui est de 2 pour le fullbody
+        transform.position += (Vector3)movement;
+        if (movement.x != 0 && isGrounded)
+        {
+            if (movement.x > 0f)
+                transform.localScale = Vector3.one;
+            else if (movement.x < 0f)
+                transform.localScale = new Vector3(-transform.parent.localScale.x, 1f, 1f);
+            transform.GetChild(0).GetComponent<Animator>().SetBool("move", true);
+        }
+        else
+        {
+            transform.GetChild(0).GetComponent<Animator>().SetBool("move", false);
+        }
+
     }
 
     public void Jump()
     {
-        gravityVelocity = jumpForce;
+        gravityVelocity = jumpForce*moydt;
         launched = true;
-
+        transform.GetChild(0).GetComponent<Animator>().SetTrigger("jump");
     }
 
     bool IsStillAttracted()

@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour {
         if (instance == null)
         {
             instance = this;
-            LoadLevel(2);
+            Invoke("SplashScreen", 1f);
             DontDestroyOnLoad(gameObject);
         }
         else if(instance != this)
@@ -22,9 +22,15 @@ public class GameManager : MonoBehaviour {
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
-            Debug.Log(GetLevel());
+        if (Input.GetKeyDown(KeyCode.R))
+            Reload();
     }
+
+    void SplashScreen()
+    {
+        LoadLevel(1);
+    }
+
     public void SetLevel(int number)
     {
         PlayerPrefs.SetInt("level", number);
@@ -43,7 +49,6 @@ public class GameManager : MonoBehaviour {
 
     public void LoadLevel(int number)
     {
-        Debug.Log("Load level " + number);
         SceneManager.LoadScene(number);
         SetLevel(number);
     }

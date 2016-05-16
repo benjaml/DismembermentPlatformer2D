@@ -17,7 +17,7 @@ public class FistComponent : MonoBehaviour {
     
     void Start()
     {
-        fistPosition = GameObject.FindGameObjectWithTag("up").transform.GetChild(1).gameObject;
+        fistPosition = GameObject.FindGameObjectWithTag("up").transform.GetChild(0).GetChild(0).gameObject;
         player = GameObject.FindGameObjectWithTag("Player");
     }
 	
@@ -37,6 +37,7 @@ public class FistComponent : MonoBehaviour {
             transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
             if(Vector3.Distance(transform.position, fistPosition.transform.position) <1f)
             {
+
                 transform.position = fistPosition.transform.position;
                 transform.parent = fistPosition.transform;
                 player.GetComponent<PlayerManager>().fists.Add(gameObject);
@@ -50,31 +51,29 @@ public class FistComponent : MonoBehaviour {
             velocityY -= Time.deltaTime;
             transform.position += new Vector3(velocityX, velocityY, 0.0f) * Time.deltaTime;
             CheckCollisionGravityOnly();
-            Debug.Log("gravityOnly");
         }
 	}
 
     private void CheckCollision()
     {
         // CheckDirection X
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, 0.15f * velocityX * Time.deltaTime);
-        if (hit.transform != null)
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector3.right, 0.9f * velocityX * Time.deltaTime);
+        if (hit.transform != null && hit.transform != transform)
         {
             fired = false;
             velocityX = 0;
             gameObject.layer = 0;
-            transform.position = (Vector3)hit.point+(Vector3)hit.normal*0.1f;
+            transform.position = (Vector3)hit.point+(Vector3)hit.normal*0.15f;
         }
 
         // CheckDirection Y
-        hit = Physics2D.Raycast(transform.position, transform.up, 0.15f*velocityY * Time.deltaTime);
-        if (hit.transform != null)
+        hit = Physics2D.Raycast(transform.position, Vector3.up, 0.9f * velocityY * Time.deltaTime);
+        if (hit.transform != null && hit.transform != transform)
         {
-            if (velocityY < 0)
-                fired = false;
             velocityY = 0;
             gameObject.layer = 0;
-            transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.1f;
+            fired = false;
+            transform.position = (Vector3)hit.point - Vector3.up * velocityY;
         }
     }
 
@@ -123,8 +122,8 @@ public class FistComponent : MonoBehaviour {
     {
         Vector3 direction = (position - transform.position).normalized;
         direction *= force;
-        velocityX = direction.x;
-        velocityY = direction.y;
+        velocityX = direction.x/2f;
+        velocityY = direction.y / 2f;
         returnBool = true;
         enableGravity = false;
         gameObject.layer = 2;
@@ -139,6 +138,7 @@ public class FistComponent : MonoBehaviour {
         fired = true;
         enableGravity = false;
         transform.parent = null;
+        transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = true;
 
     }
 }

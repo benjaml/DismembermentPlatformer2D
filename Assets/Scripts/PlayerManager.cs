@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using UnityEditor;
 
 public class PlayerManager : MonoBehaviour {
 
@@ -18,23 +17,32 @@ public class PlayerManager : MonoBehaviour {
     public DownBody downBody;
     public GameObject fistPosition;
     public List<GameObject> fists = new List<GameObject>();
-    public bool atracted;
+    private bool atracted;
 
     [Header("Movement variables")]
     private float speed = 7f;
-    private float gravity = 2.0f;
-    public bool isGrounded = false;
-    private float jumpForce = 0.25f;
+    public float gravity = 2.0f;
+    private bool isGrounded = false;
+    public float jumpForce = 0.3f;
     private bool jumping;
 
     // Private variables
-    public Vector2 movement = Vector2.zero;
+    private Vector2 movement = Vector2.zero;
     public float gravityVelocity = 0.0f;
-    public float gravityOnlyVelocity = 0.0f;
-    public float jumpImpulsion = 0f;
+    private float gravityOnlyVelocity = 0.0f;
+    private float jumpImpulsion = 0f;
     private Vector3 vel;
     private Vector3 attractedDirection = Vector3.zero;
 
+    //fps count
+    float moydt;
+    float fpsSom = 0;
+    int fpsCount = 0;
+
+    void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
     bool appliedForce = false;
 	// Use this for initialization
 	void Start () {
@@ -43,9 +51,13 @@ public class PlayerManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(Input.GetKeyDown(KeyCode.P))
+        if(fpsCount<1000)
         {
-            EditorApplication.isPaused = !EditorApplication.isPaused;
+            fpsSom += Time.deltaTime;
+            fpsCount++;
+            moydt = fpsSom / fpsCount;
+            upBody.moydt = moydt;
+
         }
         if(atracted)
         {
@@ -95,7 +107,6 @@ public class PlayerManager : MonoBehaviour {
         RaycastHit2D hit = Physics2D.Raycast(downBody.transform.position, -transform.up, 0.6f);
         if (hit.transform != null)
         {
-            Debug.Log("Grounded");
             isGrounded = true;
             if(gravityVelocity < 0.0f)
                 gravityVelocity = 0f;
@@ -128,7 +139,6 @@ public class PlayerManager : MonoBehaviour {
                 {
                     if (hit.transform.tag == "hand")
                     {
-                        Debug.Log("worked");
 
                         hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
                     }
@@ -145,23 +155,27 @@ public class PlayerManager : MonoBehaviour {
             movement += (Vector2)transform.right * h * Time.deltaTime * speed;
             if(!Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && isGrounded && currentState == state.FullBody)
             {
-                Debug.Log("jump");
                 isGrounded = false;
                 jumping = true;
-                gravityVelocity = jumpForce;
+                gravityVelocity = jumpForce*moydt;
                 appliedForce = true;
-
+                upBody.transform.GetChild(0).GetComponent<Animator>().SetBool("move", false);
+                downBody.transform.GetChild(0).GetComponent<Animator>().SetBool("move", false);
+                upBody.transform.GetChild(0).GetComponent<Animator>().SetTrigger("jump");
+                downBody.transform.GetChild(0).GetComponent<Animator>().SetTrigger("jump");
                 // return pour qu'il ne fasse pas le 2eme if pour un saut normal en gounded
                 return;
 
             }
             if ((Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Space) && upBody.isGrounded) || (Input.GetKeyDown(KeyCode.Space) && !isGrounded && currentState == state.FullBody))
             {
-                Debug.Log("special jump");
                 currentState = state.Separate;
+                transform.localScale = Vector3.one;
                 upBody.Jump();
                 if(downBody.isGrounded)
                     downBody.SetInertie(movement.x/Time.deltaTime);
+                upBody.transform.GetChild(0).GetComponent<Animator>().SetBool("move", false);
+                downBody.transform.GetChild(0).GetComponent<Animator>().SetBool("move", false);
 
             }
             if(Input.GetMouseButtonDown(0))
@@ -178,7 +192,6 @@ public class PlayerManager : MonoBehaviour {
                     {
                         if (hit.transform.tag == "hand")
                         {
-                            Debug.Log("worked");
 
                             hit.transform.GetComponent<FistComponent>().Return(fistPosition.transform.position);
                         }
@@ -213,6 +226,12 @@ public class PlayerManager : MonoBehaviour {
         Vector3 direction = mousePos - upBody.transform.position;
         fists[0].GetComponent<FistComponent>().Fire(direction.normalized);
         fists.RemoveAt(0);
+        if (mousePos.x > transform.position.x)
+            transform.localScale = Vector3.one;
+        else if (mousePos.x < transform.position.x)
+            transform.localScale = new Vector3(-1f, 1f, 1f);
+        upBody.transform.GetChild(0).GetComponent<Animator>().SetTrigger("shoot");
+
     }
     private void Attract(Vector3 positionToGo)
     {
@@ -271,13 +290,25 @@ public class PlayerManager : MonoBehaviour {
             movement.y = gravityVelocity;   
         // on multiplie par la masse qui est de 2 pour le fullbody
         transform.position += (Vector3)movement;
-        
+        if(movement.x !=0 && isGrounded)
+        {
+            upBody.transform.GetChild(0).GetComponent<Animator>().SetBool("move", true);
+            downBody.transform.GetChild(0).GetComponent<Animator>().SetBool("move", true);
+        }
+        else
+        {
+            upBody.transform.GetChild(0).GetComponent<Animator>().SetBool("move", false);
+            downBody.transform.GetChild(0).GetComponent<Animator>().SetBool("move", false);
+        }
+        if (movement.x > 0f)
+            transform.localScale = Vector3.one;
+        else if (movement.x < 0f)
+            transform.localScale = new Vector3(-1f, 1f, 1f);
             
     }
 
     public void PutTogether()
     {
-        Debug.Log("fusion");
 
         Vector3 upBodyPos = upBody.transform.position;
         Vector3 downBodyPos = downBody.transform.position;
@@ -285,6 +316,9 @@ public class PlayerManager : MonoBehaviour {
         downBody.transform.position = downBodyPos;
         upBody.transform.position = upBodyPos;
 
+        transform.localScale = Vector3.one;
+        transform.GetChild(0).localScale = Vector3.one;
+        transform.GetChild(1).localScale = Vector3.one;
 
         downBody.StopMovement();
         upBody.transform.position = downBody.transform.position + Vector3.up;

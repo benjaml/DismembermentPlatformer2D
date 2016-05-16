@@ -7,7 +7,7 @@ public class UnPressedButton : AbstractActivable
     public override void Activate()
     {
         GetComponent<Animator>().SetTrigger("unpress");
-        if (transform.GetChild(0).GetChild(0).tag == "hand")
+        if (transform.GetChild(0).GetChild(0).GetChild(0).tag == "hand")
         {
 
             Invoke("release", 0.2f);
@@ -16,8 +16,7 @@ public class UnPressedButton : AbstractActivable
     
     void release()
     {
-        GameObject tmp = transform.GetChild(0).GetChild(0).gameObject;
-        tmp.transform.position -= Vector3.up*0.15f;
+        GameObject tmp = transform.GetChild(0).GetChild(0).GetChild(0).gameObject;
         tmp.GetComponent<FistComponent>().enableGravity = true;
         tmp.GetComponent<FistComponent>().velocityY = 0;
         tmp.transform.parent = null;

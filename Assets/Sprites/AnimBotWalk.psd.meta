@@ -1,0 +1,225 @@
+fileFormatVersion: 2
+guid: e4a69dc9fb1e94142b5e9b2f2b8be030
+timeCreated: 1463328606
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: AnimBotWalk_0
+    21300002: AnimBotWalk_1
+    21300004: AnimBotWalk_2
+    21300006: AnimBotWalk_3
+    21300008: AnimBotWalk_4
+    21300010: AnimBotWalk_5
+    21300012: AnimBotWalk_6
+    21300014: AnimBotWalk_7
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: AnimBotWalk_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 150
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -46, y: -22}
+        - {x: -43, y: -55}
+        - {x: -75, y: -105}
+        - {x: -75, y: -129}
+        - {x: -28, y: -150}
+        - {x: 45, y: -150}
+        - {x: 45, y: -136}
+        - {x: 33, y: -94}
+        - {x: 11, y: -23}
+        - {x: 10, y: -22}
+    - name: AnimBotWalk_1
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 0
+        width: 150
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -55, y: -21}
+        - {x: -75, y: -76}
+        - {x: -75, y: -118}
+        - {x: -45, y: -150}
+        - {x: 32, y: -150}
+        - {x: 32, y: -143}
+        - {x: 15, y: -21}
+    - name: AnimBotWalk_2
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 0
+        width: 150
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -51, y: -27}
+        - {x: -51, y: -150}
+        - {x: 25, y: -150}
+        - {x: 27, y: -149}
+        - {x: 27, y: -125}
+        - {x: 12, y: -27}
+    - name: AnimBotWalk_3
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 0
+        width: 150
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 5, y: -150}
+        - {x: 16, y: -150}
+        - {x: 26, y: -146}
+        - {x: 64, y: -128}
+        - {x: 64, y: -104}
+        - {x: 9, y: -29}
+        - {x: -53, y: -29}
+        - {x: -63, y: -78}
+        - {x: -63, y: -150}
+        - {x: 4, y: -150}
+        - {x: 5, y: -147}
+        - {x: -3, y: -140}
+        - {x: 0, y: -126}
+    - name: AnimBotWalk_4
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 0
+        width: 150
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 47, y: -145}
+        - {x: 19, y: -26}
+        - {x: -47, y: -26}
+        - {x: -45, y: -58}
+        - {x: -75, y: -88}
+        - {x: -75, y: -124}
+        - {x: -51, y: -150}
+        - {x: -21, y: -150}
+        - {x: -21, y: -147}
+        - {x: -21, y: -150}
+        - {x: 47, y: -150}
+    - name: AnimBotWalk_5
+      rect:
+        serializedVersion: 2
+        x: 750
+        y: 0
+        width: 150
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -75, y: -119}
+        - {x: -35, y: -150}
+        - {x: 33, y: -150}
+        - {x: 33, y: -126}
+        - {x: 16, y: -26}
+        - {x: -51, y: -26}
+        - {x: -75, y: -87}
+    - name: AnimBotWalk_6
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 0
+        width: 150
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -36, y: -69}
+        - {x: -61, y: -109}
+        - {x: -61, y: -143}
+        - {x: -38, y: -150}
+        - {x: 31, y: -150}
+        - {x: 31, y: -48}
+        - {x: 28, y: -27}
+        - {x: -47, y: -27}
+        - {x: -44, y: -60}
+    - name: AnimBotWalk_7
+      rect:
+        serializedVersion: 2
+        x: 1050
+        y: 0
+        width: 150
+        height: 300
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 13, y: -28}
+        - {x: -46, y: -28}
+        - {x: -50, y: -75}
+        - {x: -51, y: -84}
+        - {x: -51, y: -150}
+        - {x: 29, y: -150}
+        - {x: 35, y: -148}
+        - {x: 36, y: -144}
+        - {x: 36, y: -138}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

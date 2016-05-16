@@ -74,14 +74,25 @@ public class DownBody : MonoBehaviour {
         hit = Physics2D.Raycast(transform.position, -Vector3.up, 1f);
         if (hit && hit.transform.tag == "ground" )
         {
-            Debug.Log("down hit the ground");
             float impactY = hit.point.y;
             movementDown.y = impactY - transform.position.y + 1.5f;
             isGrounded = true;
             gravityVelocity = 0.0f;
         }
 
-        transform.position += movementDown; 
+        transform.position += movementDown;
+        if (movementDown.x != 0 && isGrounded || inertie != 0f)
+        {
+            transform.GetChild(0).GetComponent<Animator>().SetBool("move", true);
+        }
+        else
+        {
+            transform.GetChild(0).GetComponent<Animator>().SetBool("move", false);
+        }
+        if (movementDown.x > 0f)
+            transform.localScale = Vector3.one;
+        else if (movementDown.x < 0f)
+            transform.localScale = new Vector3(-transform.parent.localScale.x, 1f, 1f);
         enabled = true;
 
             

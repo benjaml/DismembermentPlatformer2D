@@ -10,7 +10,7 @@ public class MenuManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
-        if(Input.GetKeyDown(KeyCode.A))
+        if(Input.anyKey)
         {
             GameManager.instance.LoadLevel(2);
         }
