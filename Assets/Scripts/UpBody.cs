@@ -169,6 +169,7 @@ public class UpBody : MonoBehaviour {
             {
                 gravityVelocity = 0;
                 atracted = false;
+                attractedDirection = Vector3.zero;
                 return;
             }
         }

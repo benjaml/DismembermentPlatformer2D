@@ -42,6 +42,9 @@ public class FistComponent : MonoBehaviour {
                 transform.parent = fistPosition.transform;
                 player.GetComponent<PlayerManager>().fists.Add(gameObject);
                 returnBool = false;
+                gameObject.layer = 0;
+                GetComponent<BoxCollider2D>().enabled = false;
+                return;
 
             }
             CheckCollisionReturn();
@@ -81,7 +84,7 @@ public class FistComponent : MonoBehaviour {
     {
         // CheckDirection X
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, velocityX * Time.deltaTime);
-        if (hit.transform != null && hit.transform != transform)
+        if (hit.transform != null && hit.transform != transform /*&& hit.transform.tag != "up"*/)
         {
             returnBool = false;
             gameObject.layer = 0;
@@ -139,6 +142,8 @@ public class FistComponent : MonoBehaviour {
         enableGravity = false;
         transform.parent = null;
         transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = true;
+        gameObject.layer = 2;
+        GetComponent<BoxCollider2D>().enabled = true;
 
     }
 }
